@@ -37,7 +37,8 @@ class PCM_Cp(om.ExplicitComponent):
         self.declare_partials('cp_pcm', ['T', 'T_lo', 'T_hi'], rows=ar, cols=ar)
 
     def compute(self, inputs, outputs):
-        outputs['cp_pcm'] = cp_basic(inputs['T'], inputs['T_lo'], inputs['T_hi'])
+
+        outputs['cp_pcm'] = cp_basic(T = inputs['T'], T1 = inputs['T_lo'], T2 = inputs['T_hi'])
 
     def compute_partials(self, inputs, partials):
         T = inputs['T']
@@ -48,10 +49,14 @@ class PCM_Cp(om.ExplicitComponent):
 
 
 def cp_basic(T, T1=60 + 273, T2=65 + 273, Cp_low=1.5, Cp_high=50):  # kJ/kgK
-    if T1 < T < T2:
-        Cp = Cp_high
-    else:
-        Cp = Cp_low
+    Cp = np.empty_like(T)
+    
+    T_cp_hi = np.logical_and(T1 < T, T < T2)
+    T_cp_low = np.logical_not(T_cp_hi)
+
+    Cp[T_cp_hi] = Cp_high
+    Cp[T_cp_low] = Cp_low
+
     return Cp
 
 

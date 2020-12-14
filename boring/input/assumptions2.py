@@ -29,11 +29,11 @@ inputs = {
 
     'cond.L_flux': [0.02, 'm'],  # Length of Condensor exposed to heat pipe
     'evap.L_flux': [0.01, 'm'],
-    'cond.pcm.cp_bulk': [1500],  # Specific Heat
+    # 'cond.pcm.cp_bulk': [1500],  # Specific Heat
     'cond.pcm.mass': [.06],
-    'cond2.pcm.cp_bulk': [1500],
+    # 'cond2.pcm.cp_bulk': [1500],
     'cond2.pcm.mass': [.06],
-    'evap.pcm.cp_bulk': [1500],
+    # 'evap.pcm.cp_bulk': [1500],
     'evap.pcm.mass': [.06],
     'evap.Rex.R': [0.0001],  # Thermal resistance external to heat pipe wall
     'cond.Rex.R': [0.0001],

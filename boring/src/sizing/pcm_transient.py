@@ -55,9 +55,9 @@ def hp_transient(transcription='gauss-lobatto', num_segments=5,
     phase.add_timeseries_output('cond_bridge.Rv.q', output_name='cRvq', units='W')
     phase.add_timeseries_output('cond_bridge.Rwa.q', output_name='cRwaq', units='W')
     phase.add_timeseries_output('cond_bridge.Rwka.q', output_name='cRwkq', units='W')
-    phase.add_timeseries_output('evap.pcm.PS', output_name='ePS', units='W')
-    phase.add_timeseries_output('cond.pcm.PS', output_name='cPS', units='W')
-    phase.add_timeseries_output('cond2.pcm.PS', output_name='c2PS', units='W')
+    phase.add_timeseries_output('evap.pcm.PS', output_name='ePS', units=None)
+    phase.add_timeseries_output('cond.pcm.PS', output_name='cPS', units=None)
+    phase.add_timeseries_output('cond2.pcm.PS', output_name='c2PS', units=None)
 
     p.model.linear_solver = om.DirectSolver()
     p.setup(force_alloc_complex=force_alloc_complex)
@@ -71,40 +71,60 @@ def hp_transient(transcription='gauss-lobatto', num_segments=5,
     p.run_model()
 
     opt = p.run_driver()
-    sim = traj.simulate(times_per_seg=10)
+    # sim = traj.simulate(times_per_seg=10)
 
     print('********************************')
 
-    save_csv(p, sim, '../../output/output.csv',
-             y_name=['parameters:T_evap', 'states:T_cond', 'states:T_cond2',
-                     'eRvq', 'eRwaq', 'eRwkq', 'cRvq', 'cRwaq', 'cRwkq'],
-             y_units=['K', 'K', 'K', 'W', 'W', 'W', 'W', 'W', 'W'])
+    # save_csv(p, sim, '../../output/output.csv',
+    #          y_name=['parameters:T_evap', 'states:T_cond', 'states:T_cond2',
+    #                  'eRvq', 'eRwaq', 'eRwkq', 'cRvq', 'cRwaq', 'cRwkq'],
+    #          y_units=['K', 'K', 'K', 'W', 'W', 'W', 'W', 'W', 'W'])
 
     if show_plots:
         import matplotlib.pyplot as plt
 
-        time = sim.get_val('traj.phase.timeseries.time', units='s')
+        # time = sim.get_val('traj.phase.timeseries.time', units='s')
         time_opt = p.get_val('traj.phase.timeseries.time', units='s')
-        T_cond = sim.get_val('traj.phase.timeseries.states:T_cond', units='K')
+        # T_cond = sim.get_val('traj.phase.timeseries.states:T_cond', units='K')
         T_cond_opt = p.get_val('traj.phase.timeseries.states:T_cond', units='K')
-        T_cond2 = sim.get_val('traj.phase.timeseries.states:T_cond2', units='K')
+        # T_cond2 = sim.get_val('traj.phase.timeseries.states:T_cond2', units='K')
         T_cond2_opt = p.get_val('traj.phase.timeseries.states:T_cond2', units='K')
-        T_evap = sim.get_val('traj.phase.timeseries.controls:T_evap', units='K')
+        # T_evap = sim.get_val('traj.phase.timeseries.controls:T_evap', units='K')
         T_evap_opt = p.get_val('traj.phase.timeseries.controls:T_evap', units='K')
 
-        plt.plot(time_opt, T_cond_opt, 'o')
-        plt.plot(time, T_cond)
+        ePS_opt = p.get_val('traj.phase.timeseries.ePS')
+        cPS_opt = p.get_val('traj.phase.timeseries.cPS')
+        c2PS_opt = p.get_val('traj.phase.timeseries.c2PS')
 
-        plt.plot(time_opt, T_cond2_opt, '*')
-        plt.plot(time, T_cond2)
+        plt.plot(time_opt, T_cond_opt)
+        # plt.plot(time, T_cond)
 
-        plt.plot(time_opt, T_evap_opt, '^')
-        plt.plot(time, T_evap)
+        plt.plot(time_opt, T_cond2_opt)
+        # plt.plot(time, T_cond2)
+
+        plt.plot(time_opt, T_evap_opt)
+        # plt.plot(time, T_evap)
 
         plt.xlabel('time, s')
         plt.ylabel('T_cond, K')
 
         plt.show()
+
+        plt.plot(time_opt, cPS_opt)
+        # plt.plot(time, EPS)
+
+        plt.plot(time_opt, c2PS_opt)
+        # plt.plot(time, T_cond2)
+
+        plt.plot(time_opt, ePS_opt)
+        # plt.plot(time, T_evap)
+
+        plt.xlabel('time, s')
+        plt.ylabel('percent solid')
+
+        plt.show()
+
+
 
     return p
 
@@ -114,10 +134,10 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    p = hp_transient(transcription='gauss-lobatto', num_segments=5,
-                     transcription_order=3, compressed=False, optimizer='SLSQP',
+    p = hp_transient(transcription='gauss-lobatto', num_segments=10,
+                     transcription_order=3, compressed=False, optimizer='SNOPT',
                      run_driver=True, force_alloc_complex=True, solve_segments=False,
-                     show_plots=False, Tf_final=370)
+                     show_plots=True, Tf_final=370)
     end = time.time()
 
     print("elapsed time:", end - start)

@@ -73,13 +73,15 @@ class PCM_Group(om.Group):
 
         self.add_subsystem(name='rate',
                            subsys=TempRateComp(num_nodes=nn),
-                           promotes_inputs=[('c_p', 'cp_bulk'), 'q', 'mass'],
+                           promotes_inputs=['c_p', 'q', 'mass'],
                            promotes_outputs=['Tdot'])
+
+        self.connect('cp_bulk', 'c_p')
 
 
 if __name__ == "__main__":
     p = om.Problem(model=om.Group())
-    nn = 1
+    nn = 5
 
     p.model.add_subsystem(name='pcm',
                           subsys=PCM_Group(num_nodes=nn),
@@ -88,7 +90,7 @@ if __name__ == "__main__":
 
     p.setup(force_alloc_complex=True)
 
-    p['T'] = 334
+    p['T'] = np.arange(330, 340, 2)
     p['T_lo'] = 333
     p['T_hi'] = 338
 
